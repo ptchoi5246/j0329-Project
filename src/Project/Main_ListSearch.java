@@ -24,7 +24,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 
-public class OTTListandSearch extends JFrame {
+public class Main_ListSearch extends JFrame {
 	
 	private JComboBox cbCondition;
 	private JTextField txtCondition;
@@ -40,7 +40,7 @@ public class OTTListandSearch extends JFrame {
 	
 	OTTDAO dao = new OTTDAO();
 
-	public OTTListandSearch() {
+	public Main_ListSearch(String ottName) {
 		super("전 체 보 기 & 검    색");
 		setSize(800,600);
 		setLocationRelativeTo(null);
@@ -96,9 +96,9 @@ public class OTTListandSearch extends JFrame {
 		pn3.setLayout(null);
 		
 		btnExit = new JButton("메 인 으 로");
-		btnExit.setFont(new Font("배달의민족 한나는 열한살", Font.PLAIN, 25));
+		btnExit.setFont(new Font("배달의민족 한나는 열한살", Font.PLAIN, 22));
 		btnExit.setBackground(Color.LIGHT_GRAY);
-		btnExit.setBounds(622, 10, 150, 58);
+		btnExit.setBounds(642, 10, 130, 58);
 		pn3.add(btnExit);
 		
 		//Jtable 설계
@@ -109,7 +109,7 @@ public class OTTListandSearch extends JFrame {
 		title.add("장르");
 		title.add("개봉년도");
 		
-		vData = dao.getOTTList("","");
+		vData = dao.getTotalList(); //메인 - 전체 보기 & 검색 getTotalList()
 		dtm = new DefaultTableModel(vData, title);
 		
 		table = new JTable(dtm);
@@ -137,56 +137,82 @@ public class OTTListandSearch extends JFrame {
 		DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
 		dtcr.setHorizontalAlignment(SwingConstants.CENTER);
 		TableColumnModel tcm = table.getColumnModel();
-
-		// 전체보기 버튼 가운데 정렬 메소드
-		movieFormAlign(tcm, dtcr);
+		movieFormAlign(tcm, dtcr); //테이블 안 가운데 정렬 메소드
 		
-		
-		
-
 		
 		//검색 버튼 마우스 클릭시
 		btnSearch.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				conditionSearch();
+
+				String cbCondi = cbCondition.getSelectedItem().toString();
+				String txtCondi = txtCondition.getText();
+				
+				if(txtCondi.trim().equals("")) {
+					JOptionPane.showMessageDialog(null, "검색할 내용을 입력하세요!");
+					txtCondition.requestFocus();
+					return;
+				}
+				if(cbCondi.equals("제      목")) {
+					vData = dao.getConditionSearch("name", txtCondi);
+					if(vData.size() != 0) {
+						System.out.println("vData : " + vData);
+						System.out.println("검색자료 출력");
+					}
+					else {
+						JOptionPane.showMessageDialog(null, "해당 제목의 작품은 없습니다. 다시 확인해주세요.");
+					}
+				}
+				else if(cbCondi.equals("O  T  T")) {
+					vData = dao.getConditionSearch("ott", txtCondi);
+					System.out.println("vData : " + vData);
+					if(vData.size() != 0) {
+						System.out.println("검색자료 출력");
+					}
+					else {
+						JOptionPane.showMessageDialog(null, "해당 OTT는 없습니다. 다시 확인해주세요.");
+					}			
+				}
+				else if(cbCondi.equals("장      르")) {
+					vData = dao.getConditionSearch("genre", txtCondi);
+					System.out.println("vData : " + vData);
+					if(vData.size() != 0) {
+						System.out.println("검색자료 출력");
+					}
+					else {
+						JOptionPane.showMessageDialog(null, "해당 장르는 없습니다. 다시 확인해주세요.");
+					}			
+				}
+				else if(cbCondi.equals("개봉년도")) {
+					if(!Pattern.matches("^[0-9]+$", txtCondi)) {
+						JOptionPane.showMessageDialog(null, "개봉년도는 숫자만 입력해주세요.");
+						txtCondition.requestFocus();
+					}
+					else vData = dao.getConditionSearch("open", txtCondi);
+				}
+				dtm.setDataVector(vData,title);
 				movieFormAlign(tcm, dtcr);
 			}
 		});
+
 		
-		// 검색 버튼 키보드로 엔터키 입력시
-		btnSearch.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyPressed(KeyEvent e) {
-				conditionSearch();
-				movieFormAlign(tcm, dtcr);
-			}
-		});
-		
-		// 전체 검색버튼 마우스 클릭시
+		// 전체검색 버튼 마우스 클릭시
 		btnList.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				totalSearch();
+				vData = dao.getTotalList();
+				dtm.setDataVector(vData, title);
 				movieFormAlign(tcm, dtcr);
 			}
 		});
+
 		
-		// 전체 검색버튼 키보드 엔터키 입력시
-		btnList.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyPressed(KeyEvent e) {
-				totalSearch();
-				movieFormAlign(tcm, dtcr);
-			};
-		});
-		
-		//종료 버튼
+		// 메인으로 버튼 마우스로 클릭시
 		btnExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				dispose();
-				new OTTMain();
+				new OTT_Main();
 			}
 		});
-		
+
 		
 	//==============================================================	
 		setVisible(true);
@@ -194,62 +220,14 @@ public class OTTListandSearch extends JFrame {
 		
 	}	
 		
-		
-	// 테이블안의 내용 가운데정렬하기
+	// 테이블안의 내용 가운데정렬하기 메소드
 	private void movieFormAlign(TableColumnModel tcm, DefaultTableCellRenderer dtcr) {
 		for(int i=0; i<tcm.getColumnCount(); i++) {
 			tcm.getColumn(i).setCellRenderer(dtcr);
 		}
 	}
 
-
-	//검색 버튼 메소드
-	protected void conditionSearch() {
-		String cbCondi = cbCondition.getSelectedItem().toString();
-		String txtCondi = txtCondition.getText();
-		
-		if(txtCondi.trim().equals("")) {
-			JOptionPane.showMessageDialog(null, "검색할 내용을 입력하세요!");
-			txtCondition.requestFocus();
-			return;
-		}
-		
-		if(cbCondi.equals("제      목")) {
-			vData = dao.getConditionSearch("name", txtCondi);
-			System.out.println("vData : " + vData);
-			if(vData.size() != 0) {
-				System.out.println("검색자료 출력");
-			}
-			else {
-				JOptionPane.showMessageDialog(null, "해당 제목의 작품은 없습니다. 다시 확인해주세요.");
-			}
-//			if(!txtCondi.equals(dao.getConditionSearch("name", txtCondi))) {
-//				JOptionPane.showMessageDialog(null, "해당 제목의 작품은 없습니다. 다시 확인해주세요.");
-//			}
-//			else {
-//				vData = dao.getConditionSearch("name", txtCondi);
-//			}
-		}
-		
-		else if(cbCondi.equals("O  T  T")) vData = dao.getConditionSearch("ott", txtCondi);
-		else if(cbCondi.equals("장      르")) vData = dao.getConditionSearch("genre", txtCondi);
-		else if(cbCondi.equals("개봉년도")) {
-			if(!Pattern.matches("^[0-9]+$", txtCondi)) {
-				JOptionPane.showMessageDialog(null, "개봉년도는 숫자만 입력해주세요.");
-				txtCondition.requestFocus();
-			}
-			else vData = dao.getConditionSearch("open", txtCondi);
-		}
-		dtm.setDataVector(vData,title);
-	}
-	
-	//전체 검색 버튼 메소드
-	protected void totalSearch() {
-		vData = dao.getOTTList("","");
-		dtm.setDataVector(vData, title);
-	}
-
-	public static void main(String[] args) {
-		new OTTListandSearch();
-	}
+//	public static void main(String[] args) {
+//		new OTTListandSearch();
+//	}
 }

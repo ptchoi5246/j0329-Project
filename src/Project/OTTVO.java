@@ -6,9 +6,8 @@ public class OTTVO {
 	private String name;
 	private String ott;
 	private String genre;
-	private int open;
+	private String open;
 	private String img;
-	
 	
 	public int getIdx() {
 		return idx;
@@ -34,10 +33,10 @@ public class OTTVO {
 	public void setGenre(String genre) {
 		this.genre = genre;
 	}
-	public int getOpen() {
+	public String getOpen() {
 		return open;
 	}
-	public void setOpen(int open) {
+	public void setOpen(String open) {
 		this.open = open;
 	}
 	public String getImg() {
@@ -46,9 +45,11 @@ public class OTTVO {
 	public void setImg(String img) {
 		this.img = img;
 	}
+	
 	@Override
 	public String toString() {
 		return "OTTVO [idx=" + idx + ", name=" + name + ", ott=" + ott + ", genre=" + genre + ", open=" + open + ", img="
 				+ img + "]";
 	}
+	
 }
