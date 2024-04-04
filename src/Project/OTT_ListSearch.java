@@ -286,17 +286,17 @@ public class OTT_ListSearch extends JFrame{
 			public void actionPerformed(ActionEvent e) {
 				String name = txtOTTCondition.getText();
 				
-				int ans = JOptionPane.showConfirmDialog(null, name + "작품을 삭제하겠습니까?");
+				int ans = JOptionPane.showConfirmDialog(null, name + " 작품을 삭제하겠습니까?");
 				if(ans == 0) {
 					res = dao.setOTTDelete(name);
 					if(res != 0) {
-						JOptionPane.showMessageDialog(null, name + "작품 삭제를 완료했습니다.");
+						JOptionPane.showMessageDialog(null, name + " 작품 삭제를 완료했습니다.");
 						dispose();
 						new OTT_ListSearch(ottName);
 					}
-					else JOptionPane.showMessageDialog(null, name + "작품 삭제를 실패했습니다.");
+					else JOptionPane.showMessageDialog(null, name + " 작품 삭제를 실패했습니다.");
 				}
-				else JOptionPane.showMessageDialog(null, name + "작품 삭제를 취소했습니다.");
+				else JOptionPane.showMessageDialog(null, name + " 작품 삭제를 취소했습니다.");
 			}
 		});
 
